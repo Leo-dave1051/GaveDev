@@ -25,7 +25,7 @@ public class PlayingState implements GameState {
     private int nearbyPainting = -1;
     private int activePainting = -1;
     private int copyProgress;
-    private int stolenPainting = -1;
+    private int stolenPainting = -1;\n    private int fakeReplacedPainting = -1;
     private int timeRemainingFrames = MISSION_TIME_FRAMES;
     private int suspicion = 0;
 
@@ -88,7 +88,7 @@ public class PlayingState implements GameState {
 
     @Override
     public void render(Graphics2D g2) {
-        museumMap.render(g2, stolenPainting);
+        museumMap.render(g2, stolenPainting, fakeReplacedPainting);
         guard.render(g2);
         player.render(g2);
 
