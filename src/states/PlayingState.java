@@ -234,9 +234,6 @@ public class PlayingState implements GameState {
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_P) {
-            player.keyReleased(new KeyEvent(new java.awt.Canvas(),
-                    KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
-                    KeyEvent.VK_W, 'w'));
             stateManager.setState(new PauseState(stateManager, this));
             return;
         }
