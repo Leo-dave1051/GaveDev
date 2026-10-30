@@ -67,15 +67,16 @@ public class PlayingState implements GameState {
                 player.getY() + player.getSize() / 2,
                 museumMap, fakeReplacedPainting);
 
-        // Reaching the exit with the original ends the mission before suspicion is processed.
-        if (stolenPainting != -1 && museumMap.isPlayerAtExit(
-                player.getX(), player.getY(), player.getSize())) {
-            stateManager.setState(new VictoryState(stateManager));
+        // Being caught takes priority, but a successful escape beats the suspicion limit.
+        if (guard.hasCaughtPlayer(player.getX(), player.getY(), player.getSize())) {
+            stateManager.setState(new GameOverState(stateManager));
             return;
         }
 
-        if (guard.hasCaughtPlayer(player.getX(), player.getY(), player.getSize())) {
-            stateManager.setState(new GameOverState(stateManager));
+        if (stolenPainting != -1 && fakeReplacedPainting == stolenPainting
+                && museumMap.isPlayerAtExit(
+                player.getX(), player.getY(), player.getSize())) {
+            stateManager.setState(new VictoryState(stateManager));
             return;
         }
 
