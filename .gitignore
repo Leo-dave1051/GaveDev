@@ -1,0 +1,20 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Build output
+out/
+build/
+target/
+
+# OS
+.DS_Store
+Thumbs.db
