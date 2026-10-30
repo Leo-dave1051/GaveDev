@@ -10,10 +10,12 @@ public class Main {
             JFrame window = new JFrame(GameConfig.TITLE);
             window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             window.setResizable(false);
-            window.setContentPane(new GamePanel());
+            GamePanel gamePanel = new GamePanel();
+            window.setContentPane(gamePanel);
             window.pack();
             window.setLocationRelativeTo(null);
             window.setVisible(true);
+            SwingUtilities.invokeLater(gamePanel::requestFocusInWindow);
         });
     }
 }
