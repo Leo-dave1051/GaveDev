@@ -70,6 +70,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
+        requestFocusInWindow();
         if (stateManager.getCurrentState() != null) {
             stateManager.getCurrentState().mousePressed(e);
         }
