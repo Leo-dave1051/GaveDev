@@ -102,7 +102,7 @@ public class PlayingState implements GameState {
         g2.fillRect(48, GameConfig.HEIGHT - 82, 470, 34);
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        g2.drawString("MOVE: WASD / ARROWS   E: COPY   F: STEAL",
+        g2.drawString("MOVE: WASD / ARROWS   E: COPY   F: STEAL   P: PAUSE",
                 60, GameConfig.HEIGHT - 60);
 
         renderTimer(g2);
@@ -233,6 +233,13 @@ public class PlayingState implements GameState {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_P) {
+            player.keyReleased(new KeyEvent(new java.awt.Canvas(),
+                    KeyEvent.KEY_RELEASED, System.currentTimeMillis(), 0,
+                    KeyEvent.VK_W, 'w'));
+            stateManager.setState(new PauseState(stateManager, this));
+            return;
+        }
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
             stateManager.setState(new MenuState(stateManager));
             return;
