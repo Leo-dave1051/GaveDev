@@ -1,0 +1,62 @@
+package world;
+
+import core.GameConfig;
+
+import java.awt.Color;
+import java.awt.Graphics2D;
+
+public class MuseumMap {
+    public void render(Graphics2D g2) {
+        g2.setColor(new Color(24, 25, 31));
+        g2.fillRect(0, 0, GameConfig.WIDTH, GameConfig.HEIGHT);
+
+        g2.setColor(new Color(77, 65, 52));
+        g2.fillRect(32, 32, GameConfig.WIDTH - 64, GameConfig.HEIGHT - 64);
+
+        g2.setColor(new Color(112, 91, 65));
+        g2.fillRect(48, 48, GameConfig.WIDTH - 96, GameConfig.HEIGHT - 96);
+
+        g2.setColor(new Color(126, 103, 73));
+        for (int x = 48; x < GameConfig.WIDTH - 48; x += 48) {
+            for (int y = 48; y < GameConfig.HEIGHT - 48; y += 48) {
+                if ((x / 48 + y / 48) % 2 == 0) {
+                    g2.fillRect(x, y, 48, 48);
+                }
+            }
+        }
+
+        drawPainting(g2, 150, 75, new Color(77, 105, 125));
+        drawPainting(g2, 390, 75, new Color(133, 82, 65));
+        drawPainting(g2, 630, 75, new Color(88, 105, 73));
+        drawPainting(g2, 150, 470, new Color(112, 86, 127));
+        drawPainting(g2, 390, 470, new Color(172, 135, 73));
+        drawPainting(g2, 630, 470, new Color(74, 104, 105));
+
+        g2.setColor(new Color(54, 39, 26));
+        g2.fillRect(32, 32, GameConfig.WIDTH - 64, 16);
+        g2.fillRect(32, GameConfig.HEIGHT - 48, GameConfig.WIDTH - 64, 16);
+        g2.fillRect(32, 32, 16, GameConfig.HEIGHT - 64);
+        g2.fillRect(GameConfig.WIDTH - 48, 32, 16, GameConfig.HEIGHT - 64);
+
+        g2.setColor(new Color(211, 174, 92));
+        g2.fillRect(850, 250, 18, 100);
+        g2.setColor(new Color(245, 219, 154));
+        g2.fillRect(854, 258, 10, 84);
+        g2.setColor(new Color(45, 35, 25));
+        g2.drawString("EXIT", 842, 240);
+    }
+
+    private void drawPainting(Graphics2D g2, int x, int y, Color artwork) {
+        g2.setColor(new Color(48, 32, 20));
+        g2.fillRect(x - 5, y - 5, 66, 86);
+        g2.setColor(new Color(211, 174, 92));
+        g2.fillRect(x - 3, y - 3, 62, 82);
+        g2.setColor(new Color(42, 37, 31));
+        g2.fillRect(x + 3, y + 3, 50, 70);
+        g2.setColor(artwork);
+        g2.fillRect(x + 7, y + 7, 42, 62);
+        g2.setColor(new Color(224, 190, 123));
+        g2.fillRect(x + 17, y + 17, 12, 12);
+        g2.fillRect(x + 13, y + 42, 25, 5);
+    }
+}
