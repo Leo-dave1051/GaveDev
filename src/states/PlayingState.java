@@ -14,6 +14,7 @@ import java.awt.event.MouseEvent;
 
 public class PlayingState implements GameState {
     private static final int COPY_DURATION_FRAMES = 180;
+    private static final int MISSION_TIME_FRAMES = 120 * GameConfig.TARGET_FPS;
 
     private final GameStateManager stateManager;
     private final Player player;
@@ -25,6 +26,7 @@ public class PlayingState implements GameState {
     private int activePainting = -1;
     private int copyProgress;
     private int stolenPainting = -1;
+    private int timeRemainingFrames = MISSION_TIME_FRAMES;
 
     public PlayingState(GameStateManager stateManager) {
         this.stateManager = stateManager;
@@ -35,6 +37,14 @@ public class PlayingState implements GameState {
 
     @Override
     public void update() {
+        if (timeRemainingFrames > 0) {
+            timeRemainingFrames--;
+        }
+        if (timeRemainingFrames <= 0) {
+            stateManager.setState(new GameOverState(stateManager, true));
+            return;
+        }
+
         player.update(museumMap);
         nearbyPainting = museumMap.getNearbyPaintingIndex(
                 player.getX(), player.getY(), player.getSize());
@@ -84,9 +94,25 @@ public class PlayingState implements GameState {
         g2.drawString("MOVE: WASD / ARROWS   E: COPY   F: STEAL",
                 60, GameConfig.HEIGHT - 60);
 
+        renderTimer(g2);
         renderGuardStatus(g2);
         renderObjective(g2);
         renderInteractionUI(g2);
+    }
+
+    private void renderTimer(Graphics2D g2) {
+        int totalSeconds = (timeRemainingFrames + GameConfig.TARGET_FPS - 1)
+                / GameConfig.TARGET_FPS;
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        String timeText = String.format("TIME: %02d:%02d", minutes, seconds);
+
+        g2.setColor(new Color(20, 20, 24, 220));
+        g2.fillRoundRect(48, 104, 180, 42, 8, 8);
+        g2.setFont(new Font("Monospaced", Font.BOLD, 16));
+        g2.setColor(totalSeconds <= 20 ? new Color(235, 95, 82)
+                : new Color(245, 219, 154));
+        g2.drawString(timeText, 64, 132);
     }
 
     private void renderGuardStatus(Graphics2D g2) {
