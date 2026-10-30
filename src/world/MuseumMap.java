@@ -10,6 +10,14 @@ public class MuseumMap {
     private static final int WALL_SIZE = 48;
     private static final int[] PAINTING_X = {150, 390, 630, 150, 390, 630};
     private static final int[] PAINTING_Y = {75, 75, 75, 470, 470, 470};
+    private static final Color[] ARTWORK_COLORS = {
+            new Color(77, 105, 125),
+            new Color(133, 82, 65),
+            new Color(88, 105, 73),
+            new Color(112, 86, 127),
+            new Color(172, 135, 73),
+            new Color(74, 104, 105)
+    };
 
     public boolean canOccupy(int x, int y, int width, int height) {
         Rectangle playerBounds = new Rectangle(x, y, width, height);
@@ -46,12 +54,22 @@ public class MuseumMap {
         return -1;
     }
 
+    public boolean isPlayerAtExit(int playerX, int playerY, int playerSize) {
+        Rectangle player = new Rectangle(playerX, playerY, playerSize, playerSize);
+        Rectangle exit = new Rectangle(840, 245, 38, 110);
+        return player.intersects(exit);
+    }
+
     private boolean intersectsPainting(Rectangle player, int x, int y) {
         Rectangle frame = new Rectangle(x - 5, y - 5, 66, 86);
         return player.intersects(frame);
     }
 
     public void render(Graphics2D g2) {
+        render(g2, -1);
+    }
+
+    public void render(Graphics2D g2, int stolenPainting) {
         g2.setColor(new Color(24, 25, 31));
         g2.fillRect(0, 0, GameConfig.WIDTH, GameConfig.HEIGHT);
 
@@ -70,12 +88,13 @@ public class MuseumMap {
             }
         }
 
-        drawPainting(g2, 150, 75, new Color(77, 105, 125));
-        drawPainting(g2, 390, 75, new Color(133, 82, 65));
-        drawPainting(g2, 630, 75, new Color(88, 105, 73));
-        drawPainting(g2, 150, 470, new Color(112, 86, 127));
-        drawPainting(g2, 390, 470, new Color(172, 135, 73));
-        drawPainting(g2, 630, 470, new Color(74, 104, 105));
+        for (int i = 0; i < PAINTING_X.length; i++) {
+            if (i != stolenPainting) {
+                drawPainting(g2, PAINTING_X[i], PAINTING_Y[i], ARTWORK_COLORS[i]);
+            } else {
+                drawEmptyFrame(g2, PAINTING_X[i], PAINTING_Y[i]);
+            }
+        }
 
         g2.setColor(new Color(54, 39, 26));
         g2.fillRect(32, 32, GameConfig.WIDTH - 64, 16);
@@ -89,6 +108,20 @@ public class MuseumMap {
         g2.fillRect(854, 258, 10, 84);
         g2.setColor(new Color(45, 35, 25));
         g2.drawString("EXIT", 842, 240);
+    }
+
+    private void drawEmptyFrame(Graphics2D g2, int x, int y) {
+        g2.setColor(new Color(48, 32, 20));
+        g2.fillRect(x - 5, y - 5, 66, 86);
+        g2.setColor(new Color(211, 174, 92));
+        g2.fillRect(x - 3, y - 3, 62, 82);
+        g2.setColor(new Color(42, 37, 31));
+        g2.fillRect(x + 3, y + 3, 50, 70);
+        g2.setColor(new Color(22, 20, 19));
+        g2.fillRect(x + 7, y + 7, 42, 62);
+        g2.setColor(new Color(175, 145, 95));
+        g2.drawLine(x + 9, y + 9, x + 47, y + 69);
+        g2.drawLine(x + 47, y + 9, x + 9, y + 69);
     }
 
     private void drawPainting(Graphics2D g2, int x, int y, Color artwork) {
