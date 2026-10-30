@@ -27,6 +27,7 @@ public class PlayingState implements GameState {
     private int copyProgress;
     private int stolenPainting = -1;
     private int timeRemainingFrames = MISSION_TIME_FRAMES;
+    private int suspicion = 0;
 
     public PlayingState(GameStateManager stateManager) {
         this.stateManager = stateManager;
@@ -64,6 +65,16 @@ public class PlayingState implements GameState {
         guard.update(player.getX() + player.getSize() / 2,
                 player.getY() + player.getSize() / 2);
 
+        if (guard.isChasing()) {
+            suspicion = Math.min(100, suspicion + 1);
+        } else {
+            suspicion = Math.max(0, suspicion - 2);
+        }
+        if (suspicion >= 100) {
+            stateManager.setState(new GameOverState(stateManager, false, true));
+            return;
+        }
+
         if (guard.hasCaughtPlayer(player.getX(), player.getY(), player.getSize())) {
             stateManager.setState(new GameOverState(stateManager));
             return;
@@ -95,6 +106,7 @@ public class PlayingState implements GameState {
                 60, GameConfig.HEIGHT - 60);
 
         renderTimer(g2);
+        renderSuspicion(g2);
         renderGuardStatus(g2);
         renderObjective(g2);
         renderInteractionUI(g2);
@@ -113,6 +125,24 @@ public class PlayingState implements GameState {
         g2.setColor(totalSeconds <= 20 ? new Color(235, 95, 82)
                 : new Color(245, 219, 154));
         g2.drawString(timeText, 64, 132);
+    }
+
+    private void renderSuspicion(Graphics2D g2) {
+        g2.setColor(new Color(20, 20, 24, 220));
+        g2.fillRoundRect(48, 154, 250, 48, 8, 8);
+        g2.setFont(new Font("Monospaced", Font.BOLD, 12));
+        g2.setColor(Color.WHITE);
+        g2.drawString("SUSPICION", 62, 173);
+        g2.setColor(new Color(65, 58, 48));
+        g2.fillRect(62, 181, 220, 10);
+        if (suspicion < 40) {
+            g2.setColor(new Color(120, 180, 125));
+        } else if (suspicion < 75) {
+            g2.setColor(new Color(220, 170, 75));
+        } else {
+            g2.setColor(new Color(225, 80, 70));
+        }
+        g2.fillRect(62, 181, 220 * suspicion / 100, 10);
     }
 
     private void renderGuardStatus(Graphics2D g2) {
