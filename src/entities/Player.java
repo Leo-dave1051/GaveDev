@@ -1,6 +1,5 @@
 package entities;
 
-import core.GameConfig;
 import world.MuseumMap;
 
 import java.awt.Color;
