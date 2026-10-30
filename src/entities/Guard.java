@@ -20,6 +20,7 @@ public class Guard {
     private int inspectionIndex;
     private int inspectionTimer;
     private boolean movingToInspection = true;
+    private boolean fakeInvestigationStarted;
 
     public Guard(int startX, int startY) {
         x = startX;
@@ -32,14 +33,26 @@ public class Guard {
         double dy = playerCenterY - (y + SIZE / 2.0);
         double distance = Math.sqrt(dx * dx + dy * dy);
 
-        if (!fakeDiscovered && distance <= DETECTION_RANGE) {
+        boolean investigatingFake = fakePaintingIndex >= 0 && !fakeDiscovered;
+        if (investigatingFake && !fakeInvestigationStarted) {
+            fakeInvestigationStarted = true;
+            chasing = false;
+            inspecting = false;
+            movingToInspection = true;
+            inspectionTimer = 0;
+        }
+
+        // Once a fake has been planted, finish the inspection route instead of
+        // abandoning it to chase the player. The guard will chase after discovery.
+        if (!investigatingFake && !fakeDiscovered && distance <= DETECTION_RANGE) {
             chasing = true;
             inspecting = false;
-        } else if (chasing && !fakeDiscovered && distance > LOSE_RANGE) {
+        } else if (!investigatingFake && chasing && !fakeDiscovered
+                && distance > LOSE_RANGE) {
             chasing = false;
         }
 
-        if (chasing || fakeDiscovered) {
+        if ((chasing && !investigatingFake) || fakeDiscovered) {
             chasing = true;
             moveToward(playerCenterX, playerCenterY, CHASE_SPEED, map);
             return;
