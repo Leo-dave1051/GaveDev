@@ -25,6 +25,7 @@ public class PlayingState implements GameState {
     private int nearbyPainting = -1;
     private int activePainting = -1;
     private int copyProgress;
+    private int copiedPaintingIndex = -1;
     private int stolenPainting = -1;
     private int fakeReplacedPainting = -1;
     private int timeRemainingFrames = MISSION_TIME_FRAMES;
@@ -58,6 +59,7 @@ public class PlayingState implements GameState {
                 copyProgress++;
                 if (copyProgress >= COPY_DURATION_FRAMES) {
                     copiedPaintings[activePainting] = true;
+                    copiedPaintingIndex = activePainting;
                     cancelCopying();
                 }
             }
@@ -200,8 +202,7 @@ public class PlayingState implements GameState {
             g2.setColor(Color.WHITE);
             g2.setFont(new Font("Monospaced", Font.PLAIN, 11));
             g2.drawString(percent + "%", 555, 510);
-        } else if (nearbyPainting != -1 && stolenPainting == -1
-                && copiedPaintings[nearbyPainting]) {
+        } else if (copiedPaintingIndex != -1 && stolenPainting == -1) {
             g2.setColor(new Color(20, 20, 24, 220));
             g2.fillRoundRect(340, 500, 280, 42, 8, 8);
             g2.setColor(new Color(245, 219, 154));
@@ -231,10 +232,10 @@ public class PlayingState implements GameState {
     }
 
     private void stealPainting() {
-        if (nearbyPainting != -1 && copiedPaintings[nearbyPainting]
+        if (copiedPaintingIndex != -1 && copiedPaintings[copiedPaintingIndex]
                 && stolenPainting == -1 && activePainting == -1) {
-            stolenPainting = nearbyPainting;
-            fakeReplacedPainting = nearbyPainting;
+            stolenPainting = copiedPaintingIndex;
+            fakeReplacedPainting = copiedPaintingIndex;
         }
     }
 
