@@ -21,13 +21,11 @@ public class MuseumMap {
 
     public boolean canOccupy(int x, int y, int width, int height) {
         Rectangle playerBounds = new Rectangle(x, y, width, height);
-
         if (x < WALL_SIZE || y < WALL_SIZE
                 || x + width > GameConfig.WIDTH - WALL_SIZE
                 || y + height > GameConfig.HEIGHT - WALL_SIZE) {
             return false;
         }
-
         for (int i = 0; i < PAINTING_X.length; i++) {
             if (intersectsPainting(playerBounds, PAINTING_X[i], PAINTING_Y[i])) {
                 return false;
@@ -40,18 +38,24 @@ public class MuseumMap {
         int playerCenterX = playerX + playerSize / 2;
         int playerCenterY = playerY + playerSize / 2;
         int interactionRange = 82;
-
         for (int i = 0; i < PAINTING_X.length; i++) {
             int paintingCenterX = PAINTING_X[i] + 28;
             int paintingCenterY = PAINTING_Y[i] + 38;
             int dx = playerCenterX - paintingCenterX;
             int dy = playerCenterY - paintingCenterY;
-
             if (dx * dx + dy * dy <= interactionRange * interactionRange) {
                 return i;
             }
         }
         return -1;
+    }
+
+    public int getPaintingCenterX(int index) {
+        return PAINTING_X[index] + 28;
+    }
+
+    public int getPaintingCenterY(int index) {
+        return PAINTING_Y[index] + 38;
     }
 
     public boolean isPlayerAtExit(int playerX, int playerY, int playerSize) {
@@ -66,16 +70,14 @@ public class MuseumMap {
     }
 
     public void render(Graphics2D g2) {
-        render(g2, -1);
+        render(g2, -1, -1);
     }
 
-    public void render(Graphics2D g2, int stolenPainting) {
+    public void render(Graphics2D g2, int stolenPainting, int fakePainting) {
         g2.setColor(new Color(24, 25, 31));
         g2.fillRect(0, 0, GameConfig.WIDTH, GameConfig.HEIGHT);
-
         g2.setColor(new Color(77, 65, 52));
         g2.fillRect(32, 32, GameConfig.WIDTH - 64, GameConfig.HEIGHT - 64);
-
         g2.setColor(new Color(112, 91, 65));
         g2.fillRect(48, 48, GameConfig.WIDTH - 96, GameConfig.HEIGHT - 96);
 
@@ -89,10 +91,12 @@ public class MuseumMap {
         }
 
         for (int i = 0; i < PAINTING_X.length; i++) {
-            if (i != stolenPainting) {
-                drawPainting(g2, PAINTING_X[i], PAINTING_Y[i], ARTWORK_COLORS[i]);
-            } else {
+            if (i == fakePainting) {
+                drawFakePainting(g2, PAINTING_X[i], PAINTING_Y[i], ARTWORK_COLORS[i]);
+            } else if (i == stolenPainting) {
                 drawEmptyFrame(g2, PAINTING_X[i], PAINTING_Y[i]);
+            } else {
+                drawPainting(g2, PAINTING_X[i], PAINTING_Y[i], ARTWORK_COLORS[i]);
             }
         }
 
@@ -122,6 +126,13 @@ public class MuseumMap {
         g2.setColor(new Color(175, 145, 95));
         g2.drawLine(x + 9, y + 9, x + 47, y + 69);
         g2.drawLine(x + 47, y + 9, x + 9, y + 69);
+    }
+
+    private void drawFakePainting(Graphics2D g2, int x, int y, Color artwork) {
+        drawPainting(g2, x, y, artwork);
+        g2.setColor(new Color(225, 75, 65));
+        g2.drawRect(x + 7, y + 7, 42, 62);
+        g2.drawLine(x + 10, y + 10, x + 46, y + 66);
     }
 
     private void drawPainting(Graphics2D g2, int x, int y, Color artwork) {
