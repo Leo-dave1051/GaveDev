@@ -8,6 +8,8 @@ import java.awt.Rectangle;
 
 public class MuseumMap {
     private static final int WALL_SIZE = 48;
+    private static final int[] PAINTING_X = {150, 390, 630, 150, 390, 630};
+    private static final int[] PAINTING_Y = {75, 75, 75, 470, 470, 470};
 
     public boolean canOccupy(int x, int y, int width, int height) {
         Rectangle playerBounds = new Rectangle(x, y, width, height);
@@ -18,12 +20,30 @@ public class MuseumMap {
             return false;
         }
 
-        return !intersectsPainting(playerBounds, 150, 75)
-                && !intersectsPainting(playerBounds, 390, 75)
-                && !intersectsPainting(playerBounds, 630, 75)
-                && !intersectsPainting(playerBounds, 150, 470)
-                && !intersectsPainting(playerBounds, 390, 470)
-                && !intersectsPainting(playerBounds, 630, 470);
+        for (int i = 0; i < PAINTING_X.length; i++) {
+            if (intersectsPainting(playerBounds, PAINTING_X[i], PAINTING_Y[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public int getNearbyPaintingIndex(int playerX, int playerY, int playerSize) {
+        int playerCenterX = playerX + playerSize / 2;
+        int playerCenterY = playerY + playerSize / 2;
+        int interactionRange = 82;
+
+        for (int i = 0; i < PAINTING_X.length; i++) {
+            int paintingCenterX = PAINTING_X[i] + 28;
+            int paintingCenterY = PAINTING_Y[i] + 38;
+            int dx = playerCenterX - paintingCenterX;
+            int dy = playerCenterY - paintingCenterY;
+
+            if (dx * dx + dy * dy <= interactionRange * interactionRange) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private boolean intersectsPainting(Rectangle player, int x, int y) {
