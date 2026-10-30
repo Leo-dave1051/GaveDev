@@ -11,7 +11,7 @@ public class Guard {
     private static final double CHASE_SPEED = 2.1;
 
     private double x;
-    private final double y;
+    private double y;
     private double patrolDirection = 1;
     private boolean chasing;
 
@@ -34,6 +34,9 @@ public class Guard {
         if (chasing) {
             double length = Math.max(1.0, distance);
             x += (dx / length) * CHASE_SPEED;
+            y += (dy / length) * CHASE_SPEED;
+            x = Math.max(48, Math.min(960 - 48 - SIZE, x));
+            y = Math.max(48, Math.min(600 - 48 - SIZE, y));
         } else {
             x += patrolDirection * PATROL_SPEED;
             if (x <= 470) {
