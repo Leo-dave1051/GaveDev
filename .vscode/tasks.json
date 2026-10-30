@@ -8,11 +8,9 @@
       "args": [
         "-d",
         "out",
-        "src/Main.java",
-        "src/core/*.java",
-        "src/states/*.java",
-        "src/entities/*.java",
-        "src/world/*.java"
+        "-sourcepath",
+        "src",
+        "src/Main.java"
       ],
       "group": {
         "kind": "build",
