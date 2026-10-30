@@ -12,14 +12,20 @@ import java.awt.event.MouseEvent;
 public class GameOverState implements GameState {
     private final GameStateManager stateManager;
     private final boolean timeExpired;
+    private final boolean securityAlert;
 
     public GameOverState(GameStateManager stateManager) {
         this(stateManager, false);
     }
 
     public GameOverState(GameStateManager stateManager, boolean timeExpired) {
+        this(stateManager, timeExpired, false);
+    }
+
+    public GameOverState(GameStateManager stateManager, boolean timeExpired, boolean securityAlert) {
         this.stateManager = stateManager;
         this.timeExpired = timeExpired;
+        this.securityAlert = securityAlert;
     }
 
     @Override
@@ -32,13 +38,15 @@ public class GameOverState implements GameState {
         g2.fillRect(0, 0, GameConfig.WIDTH, GameConfig.HEIGHT);
 
         g2.setFont(new Font("Monospaced", Font.BOLD, 54));
-        String title = timeExpired ? "TIME'S UP!" : "CAUGHT!";
+        String title = securityAlert ? "ALARM RAISED!" : timeExpired ? "TIME'S UP!" : "CAUGHT!";
         int titleWidth = g2.getFontMetrics().stringWidth(title);
         g2.setColor(new Color(220, 75, 65));
         g2.drawString(title, (GameConfig.WIDTH - titleWidth) / 2, 235);
 
         g2.setFont(new Font("Monospaced", Font.PLAIN, 17));
-        String message = timeExpired
+        String message = securityAlert
+                ? "Security noticed you for too long."
+                : timeExpired
                 ? "You ran out of time before escaping."
                 : "The museum guard caught you.";
         int messageWidth = g2.getFontMetrics().stringWidth(message);
