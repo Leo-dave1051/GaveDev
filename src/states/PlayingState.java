@@ -24,6 +24,7 @@ public class PlayingState implements GameState {
     private int nearbyPainting = -1;
     private int activePainting = -1;
     private int copyProgress;
+    private int stolenPainting = -1;
 
     public PlayingState(GameStateManager stateManager) {
         this.stateManager = stateManager;
@@ -55,12 +56,18 @@ public class PlayingState implements GameState {
 
         if (guard.hasCaughtPlayer(player.getX(), player.getY(), player.getSize())) {
             stateManager.setState(new GameOverState(stateManager));
+            return;
+        }
+
+        if (stolenPainting != -1 && museumMap.isPlayerAtExit(
+                player.getX(), player.getY(), player.getSize())) {
+            stateManager.setState(new VictoryState(stateManager));
         }
     }
 
     @Override
     public void render(Graphics2D g2) {
-        museumMap.render(g2);
+        museumMap.render(g2, stolenPainting);
         guard.render(g2);
         player.render(g2);
 
@@ -71,14 +78,15 @@ public class PlayingState implements GameState {
         g2.drawString("MUSEUM: MAIN HALL", 62, 78);
 
         g2.setColor(new Color(20, 20, 24, 220));
-        g2.fillRect(48, GameConfig.HEIGHT - 82, 420, 34);
+        g2.fillRect(48, GameConfig.HEIGHT - 82, 470, 34);
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        g2.drawString("MOVE: WASD / ARROWS   E: COPY   ESC: MENU",
+        g2.drawString("MOVE: WASD / ARROWS   E: COPY   F: STEAL",
                 60, GameConfig.HEIGHT - 60);
 
         renderGuardStatus(g2);
-        renderCopyingUI(g2);
+        renderObjective(g2);
+        renderInteractionUI(g2);
     }
 
     private void renderGuardStatus(Graphics2D g2) {
@@ -94,7 +102,23 @@ public class PlayingState implements GameState {
         }
     }
 
-    private void renderCopyingUI(Graphics2D g2) {
+    private void renderObjective(Graphics2D g2) {
+        g2.setColor(new Color(20, 20, 24, 220));
+        g2.fillRoundRect(690, 100, 220, 58, 8, 8);
+        g2.setFont(new Font("Monospaced", Font.BOLD, 12));
+        g2.setColor(new Color(231, 194, 111));
+        if (stolenPainting == -1) {
+            g2.drawString("OBJECTIVE:", 705, 123);
+            g2.setColor(Color.WHITE);
+            g2.drawString("COPY THEN STEAL", 705, 143);
+        } else {
+            g2.drawString("OBJECTIVE:", 705, 123);
+            g2.setColor(new Color(145, 210, 150));
+            g2.drawString("REACH THE EXIT", 705, 143);
+        }
+    }
+
+    private void renderInteractionUI(Graphics2D g2) {
         if (activePainting != -1) {
             int percent = Math.min(100, copyProgress * 100 / COPY_DURATION_FRAMES);
             g2.setColor(new Color(20, 20, 24, 230));
@@ -109,25 +133,40 @@ public class PlayingState implements GameState {
             g2.setColor(Color.WHITE);
             g2.setFont(new Font("Monospaced", Font.PLAIN, 11));
             g2.drawString(percent + "%", 555, 510);
+        } else if (nearbyPainting != -1 && stolenPainting == -1
+                && copiedPaintings[nearbyPainting]) {
+            g2.setColor(new Color(20, 20, 24, 220));
+            g2.fillRoundRect(340, 500, 280, 42, 8, 8);
+            g2.setColor(new Color(245, 219, 154));
+            g2.setFont(new Font("Monospaced", Font.BOLD, 13));
+            g2.drawString("PRESS F TO STEAL ORIGINAL", 355, 526);
         } else if (nearbyPainting != -1 && !copiedPaintings[nearbyPainting]) {
             g2.setColor(new Color(20, 20, 24, 220));
             g2.fillRoundRect(340, 500, 280, 42, 8, 8);
             g2.setColor(new Color(245, 219, 154));
             g2.setFont(new Font("Monospaced", Font.BOLD, 13));
             g2.drawString("PRESS E TO COPY PAINTING", 360, 526);
-        } else if (nearbyPainting != -1) {
+        } else if (stolenPainting != -1) {
             g2.setColor(new Color(20, 20, 24, 220));
-            g2.fillRoundRect(370, 500, 220, 42, 8, 8);
+            g2.fillRoundRect(340, 500, 280, 42, 8, 8);
             g2.setColor(new Color(145, 210, 150));
             g2.setFont(new Font("Monospaced", Font.BOLD, 13));
-            g2.drawString("PAINTING COPIED", 393, 526);
+            g2.drawString("ORIGINAL SECURED! FIND EXIT", 355, 526);
         }
     }
 
     private void startCopying() {
-        if (nearbyPainting != -1 && !copiedPaintings[nearbyPainting]) {
+        if (nearbyPainting != -1 && !copiedPaintings[nearbyPainting]
+                && stolenPainting == -1) {
             activePainting = nearbyPainting;
             copyProgress = 0;
+        }
+    }
+
+    private void stealPainting() {
+        if (nearbyPainting != -1 && copiedPaintings[nearbyPainting]
+                && stolenPainting == -1 && activePainting == -1) {
+            stolenPainting = nearbyPainting;
         }
     }
 
@@ -144,6 +183,9 @@ public class PlayingState implements GameState {
         }
         if (e.getKeyCode() == KeyEvent.VK_E && activePainting == -1) {
             startCopying();
+        }
+        if (e.getKeyCode() == KeyEvent.VK_F) {
+            stealPainting();
         }
         player.keyPressed(e);
     }
