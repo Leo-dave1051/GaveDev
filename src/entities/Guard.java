@@ -8,14 +8,12 @@ public class Guard {
     private static final int SIZE = 26;
     private static final double DETECTION_RANGE = 190.0;
     private static final double LOSE_RANGE = 270.0;
-    private static final double PATROL_SPEED = 1.4;
     private static final double CHASE_SPEED = 2.1;
     private static final double INSPECT_SPEED = 1.7;
     private static final int INSPECTION_DURATION = 75;
 
     private double x;
     private double y;
-    private double patrolDirection = 1;
     private boolean chasing;
     private boolean inspecting;
     private boolean fakeDiscovered;
@@ -43,12 +41,12 @@ public class Guard {
 
         if (chasing || fakeDiscovered) {
             chasing = true;
-            moveToward(playerCenterX, playerCenterY, CHASE_SPEED);
+            moveToward(playerCenterX, playerCenterY, CHASE_SPEED, map);
             return;
         }
 
-        int targetX = map.getPaintingCenterX(inspectionIndex);
-        int targetY = map.getPaintingCenterY(inspectionIndex);
+        int targetX = map.getInspectionPointX(inspectionIndex);
+        int targetY = map.getInspectionPointY(inspectionIndex);
 
         if (movingToInspection) {
             inspecting = false;
@@ -56,8 +54,8 @@ public class Guard {
             double targetDy = targetY - (y + SIZE / 2.0);
             double targetDistance = Math.sqrt(targetDx * targetDx + targetDy * targetDy);
 
-            if (targetDistance > 14) {
-                moveToward(targetX, targetY, INSPECT_SPEED);
+            if (targetDistance > 5) {
+                moveToward(targetX, targetY, INSPECT_SPEED, map);
             } else {
                 movingToInspection = false;
                 inspecting = true;
@@ -83,14 +81,22 @@ public class Guard {
         }
     }
 
-    private void moveToward(double targetX, double targetY, double speed) {
+    private void moveToward(double targetX, double targetY, double speed, MuseumMap map) {
         double dx = targetX - (x + SIZE / 2.0);
         double dy = targetY - (y + SIZE / 2.0);
         double length = Math.max(1.0, Math.sqrt(dx * dx + dy * dy));
-        x += (dx / length) * speed;
-        y += (dy / length) * speed;
-        x = Math.max(48, Math.min(960 - 48 - SIZE, x));
-        y = Math.max(48, Math.min(600 - 48 - SIZE, y));
+        double stepX = (dx / length) * speed;
+        double stepY = (dy / length) * speed;
+
+        int nextX = (int) Math.round(x + stepX);
+        int nextY = (int) Math.round(y + stepY);
+
+        if (map.canOccupy(nextX, (int) Math.round(y), SIZE, SIZE)) {
+            x += stepX;
+        }
+        if (map.canOccupy((int) Math.round(x), nextY, SIZE, SIZE)) {
+            y += stepY;
+        }
     }
 
     public boolean hasCaughtPlayer(int playerX, int playerY, int playerSize) {
