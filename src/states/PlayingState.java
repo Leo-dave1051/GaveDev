@@ -24,7 +24,7 @@ public class PlayingState implements GameState {
 
     @Override
     public void update() {
-        player.update();
+        player.update(museumMap);
     }
 
     @Override
