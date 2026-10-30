@@ -25,7 +25,8 @@ public class PlayingState implements GameState {
     private int nearbyPainting = -1;
     private int activePainting = -1;
     private int copyProgress;
-    private int stolenPainting = -1;\n    private int fakeReplacedPainting = -1;
+    private int stolenPainting = -1;
+    private int fakeReplacedPainting = -1;
     private int timeRemainingFrames = MISSION_TIME_FRAMES;
     private int suspicion = 0;
 
