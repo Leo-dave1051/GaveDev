@@ -63,24 +63,14 @@ public class PlayingState implements GameState {
             }
         }
 
-        boolean fakePresent = fakeReplacedPainting != -1;
-        int fakeCenterX = fakePresent ? museumMap.getPaintingCenterX(fakeReplacedPainting) : 0;
-        int fakeCenterY = fakePresent ? museumMap.getPaintingCenterY(fakeReplacedPainting) : 0;
         guard.update(player.getX() + player.getSize() / 2,
                 player.getY() + player.getSize() / 2,
-                fakePresent, fakeCenterX, fakeCenterY);
+                museumMap, fakeReplacedPainting);
 
-        if (guard.hasDiscoveredFake()) {
-            suspicion = Math.min(100, suspicion + 2);
-        } else if (guard.isInspecting()) {
-            suspicion = Math.min(100, suspicion + 1);
-        } else if (guard.isChasing()) {
-            suspicion = Math.min(100, suspicion + 1);
-        } else {
-            suspicion = Math.max(0, suspicion - 2);
-        }
-        if (suspicion >= 100) {
-            stateManager.setState(new GameOverState(stateManager, false, true));
+        // Reaching the exit with the original ends the mission before suspicion is processed.
+        if (stolenPainting != -1 && museumMap.isPlayerAtExit(
+                player.getX(), player.getY(), player.getSize())) {
+            stateManager.setState(new VictoryState(stateManager));
             return;
         }
 
@@ -89,9 +79,17 @@ public class PlayingState implements GameState {
             return;
         }
 
-        if (stolenPainting != -1 && museumMap.isPlayerAtExit(
-                player.getX(), player.getY(), player.getSize())) {
-            stateManager.setState(new VictoryState(stateManager));
+        if (guard.hasDiscoveredFake()) {
+            suspicion = Math.min(100, suspicion + 2);
+        } else if (guard.isChasing()) {
+            suspicion = Math.min(100, suspicion + 1);
+        } else {
+            suspicion = Math.max(0, suspicion - 1);
+        }
+
+        if (suspicion >= 100) {
+            stateManager.setState(new GameOverState(stateManager, false, true));
+            return;
         }
     }
 
@@ -163,7 +161,7 @@ public class PlayingState implements GameState {
             g2.drawString("GUARD ALERT! RUN!", 710, 74);
         } else if (guard.isInspecting()) {
             g2.setColor(new Color(245, 205, 90));
-            g2.drawString("GUARD: INSPECTING", 710, 74);
+            g2.drawString("GUARD: CHECKING " + (guard.getInspectionIndex() + 1), 710, 74);
         } else {
             g2.setColor(new Color(190, 190, 190));
             g2.drawString("GUARD: PATROLLING", 710, 74);
@@ -225,7 +223,7 @@ public class PlayingState implements GameState {
 
     private void startCopying() {
         if (nearbyPainting != -1 && !copiedPaintings[nearbyPainting]
-                && stolenPainting == -1) {
+                && stolenPainting == -1 && activePainting == -1) {
             activePainting = nearbyPainting;
             copyProgress = 0;
         }
