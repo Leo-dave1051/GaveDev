@@ -69,16 +69,16 @@ public class PlayingState implements GameState {
                 player.getY() + player.getSize() / 2,
                 museumMap, fakeReplacedPainting);
 
-        // Being caught takes priority, but a successful escape beats the suspicion limit.
-        if (guard.hasCaughtPlayer(player.getX(), player.getY(), player.getSize())) {
-            stateManager.setState(new GameOverState(stateManager));
+        // Reaching the exit with the original painting completes the mission.
+        // Check this before guard contact so stepping into the exit wins immediately.
+        if (stolenPainting != -1 && museumMap.isPlayerAtExit(
+                player.getX(), player.getY(), player.getSize())) {
+            stateManager.setState(new VictoryState(stateManager));
             return;
         }
 
-        if (stolenPainting != -1 && fakeReplacedPainting == stolenPainting
-                && museumMap.isPlayerAtExit(
-                player.getX(), player.getY(), player.getSize())) {
-            stateManager.setState(new VictoryState(stateManager));
+        if (guard.hasCaughtPlayer(player.getX(), player.getY(), player.getSize())) {
+            stateManager.setState(new GameOverState(stateManager));
             return;
         }
 
@@ -232,10 +232,27 @@ public class PlayingState implements GameState {
     }
 
     private void stealPainting() {
-        if (copiedPaintingIndex != -1 && copiedPaintings[copiedPaintingIndex]
-                && stolenPainting == -1 && activePainting == -1) {
-            stolenPainting = copiedPaintingIndex;
-            fakeReplacedPainting = copiedPaintingIndex;
+        if (stolenPainting != -1 || activePainting != -1) {
+            return;
+        }
+
+        // Use the most recently completed copy. The fallback also handles
+        // cases where a copied flag was set before the remembered index.
+        int paintingToSteal = copiedPaintingIndex;
+        if (paintingToSteal < 0 || paintingToSteal >= copiedPaintings.length
+                || !copiedPaintings[paintingToSteal]) {
+            paintingToSteal = -1;
+            for (int i = 0; i < copiedPaintings.length; i++) {
+                if (copiedPaintings[i]) {
+                    paintingToSteal = i;
+                    break;
+                }
+            }
+        }
+
+        if (paintingToSteal != -1) {
+            stolenPainting = paintingToSteal;
+            fakeReplacedPainting = paintingToSteal;
         }
     }
 
