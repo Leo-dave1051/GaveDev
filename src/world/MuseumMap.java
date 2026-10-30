@@ -72,7 +72,8 @@ public class MuseumMap {
 
     public boolean isPlayerAtExit(int playerX, int playerY, int playerSize) {
         Rectangle player = new Rectangle(playerX, playerY, playerSize, playerSize);
-        Rectangle exit = new Rectangle(840, 245, 38, 110);
+        // Generous trigger zone around the visible exit doorway.
+        Rectangle exit = new Rectangle(820, 220, 88, 160);
         return player.intersects(exit);
     }
 
