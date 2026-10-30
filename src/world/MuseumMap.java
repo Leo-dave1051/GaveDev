@@ -4,8 +4,33 @@ import core.GameConfig;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 public class MuseumMap {
+    private static final int WALL_SIZE = 48;
+
+    public boolean canOccupy(int x, int y, int width, int height) {
+        Rectangle playerBounds = new Rectangle(x, y, width, height);
+
+        if (x < WALL_SIZE || y < WALL_SIZE
+                || x + width > GameConfig.WIDTH - WALL_SIZE
+                || y + height > GameConfig.HEIGHT - WALL_SIZE) {
+            return false;
+        }
+
+        return !intersectsPainting(playerBounds, 150, 75)
+                && !intersectsPainting(playerBounds, 390, 75)
+                && !intersectsPainting(playerBounds, 630, 75)
+                && !intersectsPainting(playerBounds, 150, 470)
+                && !intersectsPainting(playerBounds, 390, 470)
+                && !intersectsPainting(playerBounds, 630, 470);
+    }
+
+    private boolean intersectsPainting(Rectangle player, int x, int y) {
+        Rectangle frame = new Rectangle(x - 5, y - 5, 66, 86);
+        return player.intersects(frame);
+    }
+
     public void render(Graphics2D g2) {
         g2.setColor(new Color(24, 25, 31));
         g2.fillRect(0, 0, GameConfig.WIDTH, GameConfig.HEIGHT);
