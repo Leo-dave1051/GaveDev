@@ -2,6 +2,7 @@ package states;
 
 import core.GameConfig;
 import core.GameStateManager;
+import entities.Guard;
 import entities.Player;
 import world.MuseumMap;
 
@@ -16,6 +17,7 @@ public class PlayingState implements GameState {
 
     private final GameStateManager stateManager;
     private final Player player;
+    private final Guard guard;
     private final MuseumMap museumMap;
     private final boolean[] copiedPaintings = new boolean[6];
 
@@ -26,6 +28,7 @@ public class PlayingState implements GameState {
     public PlayingState(GameStateManager stateManager) {
         this.stateManager = stateManager;
         player = new Player();
+        guard = new Guard(520, 300);
         museumMap = new MuseumMap();
     }
 
@@ -46,11 +49,19 @@ public class PlayingState implements GameState {
                 }
             }
         }
+
+        guard.update(player.getX() + player.getSize() / 2,
+                player.getY() + player.getSize() / 2);
+
+        if (guard.hasCaughtPlayer(player.getX(), player.getY(), player.getSize())) {
+            stateManager.setState(new GameOverState(stateManager));
+        }
     }
 
     @Override
     public void render(Graphics2D g2) {
         museumMap.render(g2);
+        guard.render(g2);
         player.render(g2);
 
         g2.setColor(new Color(20, 20, 24, 220));
@@ -60,13 +71,27 @@ public class PlayingState implements GameState {
         g2.drawString("MUSEUM: MAIN HALL", 62, 78);
 
         g2.setColor(new Color(20, 20, 24, 220));
-        g2.fillRect(48, GameConfig.HEIGHT - 82, 380, 34);
+        g2.fillRect(48, GameConfig.HEIGHT - 82, 420, 34);
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Monospaced", Font.PLAIN, 13));
-        g2.drawString("MOVE: WASD / ARROWS    E: COPY    ESC: MENU",
+        g2.drawString("MOVE: WASD / ARROWS   E: COPY   ESC: MENU",
                 60, GameConfig.HEIGHT - 60);
 
+        renderGuardStatus(g2);
         renderCopyingUI(g2);
+    }
+
+    private void renderGuardStatus(Graphics2D g2) {
+        g2.setColor(new Color(20, 20, 24, 220));
+        g2.fillRoundRect(690, 48, 220, 42, 8, 8);
+        g2.setFont(new Font("Monospaced", Font.BOLD, 13));
+        if (guard.isChasing()) {
+            g2.setColor(new Color(235, 95, 82));
+            g2.drawString("GUARD ALERT! RUN!", 710, 74);
+        } else {
+            g2.setColor(new Color(190, 190, 190));
+            g2.drawString("GUARD: PATROLLING", 710, 74);
+        }
     }
 
     private void renderCopyingUI(Graphics2D g2) {
