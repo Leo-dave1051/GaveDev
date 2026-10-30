@@ -50,7 +50,7 @@ public class MuseumMap {
         return -1;
     }
 
-    public int getPaintingCenterX(int index) {
+    public int getPaintingCount() {\n        return PAINTING_X.length;\n    }\n\n    public int getPaintingCenterX(int index) {
         return PAINTING_X[index] + 28;
     }
 
