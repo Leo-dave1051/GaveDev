@@ -20,14 +20,14 @@ public class MuseumMap {
     };
 
     public boolean canOccupy(int x, int y, int width, int height) {
-        Rectangle playerBounds = new Rectangle(x, y, width, height);
+        Rectangle bounds = new Rectangle(x, y, width, height);
         if (x < WALL_SIZE || y < WALL_SIZE
                 || x + width > GameConfig.WIDTH - WALL_SIZE
                 || y + height > GameConfig.HEIGHT - WALL_SIZE) {
             return false;
         }
         for (int i = 0; i < PAINTING_X.length; i++) {
-            if (intersectsPainting(playerBounds, PAINTING_X[i], PAINTING_Y[i])) {
+            if (intersectsPainting(bounds, PAINTING_X[i], PAINTING_Y[i])) {
                 return false;
             }
         }
@@ -39,10 +39,8 @@ public class MuseumMap {
         int playerCenterY = playerY + playerSize / 2;
         int interactionRange = 82;
         for (int i = 0; i < PAINTING_X.length; i++) {
-            int paintingCenterX = PAINTING_X[i] + 28;
-            int paintingCenterY = PAINTING_Y[i] + 38;
-            int dx = playerCenterX - paintingCenterX;
-            int dy = playerCenterY - paintingCenterY;
+            int dx = playerCenterX - getPaintingCenterX(i);
+            int dy = playerCenterY - getPaintingCenterY(i);
             if (dx * dx + dy * dy <= interactionRange * interactionRange) {
                 return i;
             }
@@ -62,15 +60,25 @@ public class MuseumMap {
         return PAINTING_Y[index] + 38;
     }
 
+    public int getInspectionPointX(int index) {
+        return getPaintingCenterX(index);
+    }
+
+    public int getInspectionPointY(int index) {
+        return PAINTING_Y[index] < GameConfig.HEIGHT / 2
+                ? PAINTING_Y[index] + 100
+                : PAINTING_Y[index] - 25;
+    }
+
     public boolean isPlayerAtExit(int playerX, int playerY, int playerSize) {
         Rectangle player = new Rectangle(playerX, playerY, playerSize, playerSize);
         Rectangle exit = new Rectangle(840, 245, 38, 110);
         return player.intersects(exit);
     }
 
-    private boolean intersectsPainting(Rectangle player, int x, int y) {
+    private boolean intersectsPainting(Rectangle bounds, int x, int y) {
         Rectangle frame = new Rectangle(x - 5, y - 5, 66, 86);
-        return player.intersects(frame);
+        return bounds.intersects(frame);
     }
 
     public void render(Graphics2D g2) {
@@ -127,16 +135,13 @@ public class MuseumMap {
         g2.fillRect(x + 3, y + 3, 50, 70);
         g2.setColor(new Color(22, 20, 19));
         g2.fillRect(x + 7, y + 7, 42, 62);
-        g2.setColor(new Color(175, 145, 95));
-        g2.drawLine(x + 9, y + 9, x + 47, y + 69);
-        g2.drawLine(x + 47, y + 9, x + 9, y + 69);
     }
 
     private void drawFakePainting(Graphics2D g2, int x, int y, Color artwork) {
         drawPainting(g2, x, y, artwork);
-        g2.setColor(new Color(225, 75, 65));
-        g2.drawRect(x + 7, y + 7, 42, 62);
-        g2.drawLine(x + 10, y + 10, x + 46, y + 66);
+        // The fake looks convincing from a distance but has a small detail mismatch.
+        g2.setColor(new Color(185, 155, 112));
+        g2.fillRect(x + 34, y + 18, 7, 5);
     }
 
     private void drawPainting(Graphics2D g2, int x, int y, Color artwork) {
